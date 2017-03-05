@@ -107,7 +107,7 @@ add model =
 
 view: Model -> Html Msg
 view model =
-    div [ class "scoreboard" ] [
+    div [] [
         h1 [] [ text "Score Keeper" ],
         playerSection model,
         playerForm model,
@@ -138,7 +138,7 @@ play: Model -> Play -> Html Msg
 play model play =
     li [] [
         i [ class "remove", onClick (DeletePlay play) ] [],
-        div [] [ text ((findPlayer model.players play.playerId) |> .name) ],
+        span [] [ text ((findPlayer model.players play.playerId) |> .name) ],
         div [] [ text (toString play.points) ]
     ]
 
@@ -177,9 +177,10 @@ player: Model -> Player -> Html Msg
 player model player =
     li [] [
         i [ class "edit", onClick (Edit player) ] [],
-        div [] [
+        span [] [
             text player.name
         ],
+        br [] [],
         button [ type_ "button", onClick (Score player 2) ] [ text "2pt" ],
         button [ type_ "button", onClick (Score player 3) ] [ text "3pt" ],
         div [] [
@@ -216,8 +217,8 @@ playerForm model =
             onInput Input,
             value model.name
         ] [],
-        button [ type_ "submit" ] [ text "Save" ],
-        button [ type_ "button", onClick Cancel ] [ text "Cancel" ]
+        button [ type_ "submit" ] [ text "+" ],
+        button [ type_ "button", onClick Cancel ] [ text "←" ]
     ]
 
 main: Program Never Model Msg

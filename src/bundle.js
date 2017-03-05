@@ -8510,7 +8510,7 @@ var _user$project$Main$play = F2(
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$span,
 						{ctor: '[]'},
 						{
 							ctor: '::',
@@ -8606,7 +8606,7 @@ var _user$project$Main$playerForm = function (model) {
 					},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Save'),
+						_0: _elm_lang$html$Html$text('+'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -8624,7 +8624,7 @@ var _user$project$Main$playerForm = function (model) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Cancel'),
+							_0: _elm_lang$html$Html$text('←'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
@@ -8662,7 +8662,7 @@ var _user$project$Main$player = F2(
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$span,
 						{ctor: '[]'},
 						{
 							ctor: '::',
@@ -8672,22 +8672,9 @@ var _user$project$Main$player = F2(
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$button,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$type_('button'),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(
-										A2(_user$project$Main$Score, player, 2)),
-									_1: {ctor: '[]'}
-								}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('2pt'),
-								_1: {ctor: '[]'}
-							}),
+							_elm_lang$html$Html$br,
+							{ctor: '[]'},
+							{ctor: '[]'}),
 						_1: {
 							ctor: '::',
 							_0: A2(
@@ -8698,26 +8685,46 @@ var _user$project$Main$player = F2(
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Events$onClick(
-											A2(_user$project$Main$Score, player, 3)),
+											A2(_user$project$Main$Score, player, 2)),
 										_1: {ctor: '[]'}
 									}
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('3pt'),
+									_0: _elm_lang$html$Html$text('2pt'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
 								ctor: '::',
 								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
+									_elm_lang$html$Html$button,
 									{
 										ctor: '::',
-										_0: A2(_user$project$Main$playerPointTotal, model, player),
+										_0: _elm_lang$html$Html_Attributes$type_('button'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(
+												A2(_user$project$Main$Score, player, 3)),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('3pt'),
 										_1: {ctor: '[]'}
 									}),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: A2(_user$project$Main$playerPointTotal, model, player),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					}
@@ -8759,11 +8766,7 @@ var _user$project$Main$playerSection = function (model) {
 var _user$project$Main$view = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('scoreboard'),
-			_1: {ctor: '[]'}
-		},
+		{ctor: '[]'},
 		{
 			ctor: '::',
 			_0: A2(
