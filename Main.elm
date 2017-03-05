@@ -60,8 +60,8 @@ update msg model =
         Score player points ->
             score model player points
 
-        _ ->
-            model
+        DeletePlay play ->
+            { model | plays = (List.filter (\p -> p /= play) model.plays) } 
 
 
 score: Model -> Player -> Int -> Model
@@ -111,8 +111,45 @@ view model =
         h1 [] [ text "Score Keeper" ],
         playerSection model,
         playerForm model,
+        playsSection model,
         p [] [ text (toString model) ]
     ]
+
+playsSection: Model -> Html Msg
+playsSection model =
+    div [] [
+        playListHeader,
+        playList model
+    ]
+
+playListHeader : Html msg
+playListHeader =
+    header [] [
+        div [] [ text "Plays" ],
+        div [] [ text "Points" ]
+    ]
+
+playList: Model -> Html Msg
+playList model =
+    model.plays
+        |> List.map (play model)
+        |> ul []
+
+play: Model -> Play -> Html Msg
+play model play =
+    li [] [
+        i [ class "remove", onClick (DeletePlay play) ] [],
+        div [] [ text ((findPlayer model.players play.playerId) |> .name) ],
+        div [] [ text (toString play.points) ]
+    ]
+
+findPlayer: List Player -> Int -> Player
+findPlayer players id =
+    players 
+       |> List.filter (\player -> player.id == id)
+       |> List.head
+       |> Maybe.withDefault (Player -1 ("PLAYER NOT FOUND WITH ID=" ++ (toString id)))
+
 
 playerSection: Model -> Html Msg
 playerSection model =
