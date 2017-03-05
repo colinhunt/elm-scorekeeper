@@ -111,8 +111,7 @@ view model =
         h1 [] [ text "Score Keeper" ],
         playerSection model,
         playerForm model,
-        playsSection model,
-        p [] [ text (toString model) ]
+        playsSection model
     ]
 
 playsSection: Model -> Html Msg
