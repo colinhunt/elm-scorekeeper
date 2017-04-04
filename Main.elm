@@ -1,15 +1,14 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
-type alias Model = {
-    players: List Player,
+type alias State a = { a |
     name: String,
     playerId: Maybe Int,
-    plays: List Play
+    persisting: Int
 }
 
 type alias Player = {
@@ -23,13 +22,21 @@ type alias Play = {
     points: Int
 }
 
-initModel: Model
-initModel = {
+type alias Data = {
+    players: List Player,
+    plays: List Play
+}
+
+type alias Model = State Data
+
+initModel: (Model, Cmd msg)
+initModel = ({
         players = [],
         name = "",
         playerId = Nothing,
-        plays = []
-    }
+        plays = [],
+        persisting = 0
+    }, Cmd.none)
 
 type Msg =
     Edit Player |
@@ -37,31 +44,46 @@ type Msg =
     Input String |
     Save |
     Cancel |
-    DeletePlay Play
+    DeletePlay Play |
+    ReceiveData Model |
+    DonePersisting Bool
 
-update: Msg -> Model -> Model
+update: Msg -> Model -> (Model, Cmd msg)
 update msg model = 
     case msg of
+        ReceiveData newModel ->
+            ( newModel, Cmd.none )
+
         Input name ->
-            { model | name = name }
+            ({ model | name = name }, Cmd.none)
 
         Cancel ->
-            { model | name = "", playerId = Nothing }
+            ({ model | name = "", playerId = Nothing }, Cmd.none)
 
         Save ->
-            if model.name == "" then
-                model
-            else
-                save model 
+            persist (
+                if model.name == "" then
+                    model
+                else
+                    save model
+            )
 
         Edit player ->
-            { model | name = player.name, playerId = Just player.id }
+            ({ model | name = player.name, playerId = Just player.id }, Cmd.none)
 
         Score player points ->
-            score model player points
+            persist (score model player points)
 
         DeletePlay play ->
-            { model | plays = (List.filter (\p -> p /= play) model.plays) } 
+            persist { model | plays = (List.filter (\p -> p /= play) model.plays) }
+
+        DonePersisting _ ->
+            ({ model | persisting = model.persisting - 1 }, Cmd.none)
+
+
+persist: Model -> (Model, Cmd msg)
+persist model =
+    ( { model | persisting = model.persisting + 1 }, persistData (Data model.players model.plays) )
 
 
 score: Model -> Player -> Int -> Model
@@ -108,10 +130,20 @@ add model =
 view: Model -> Html Msg
 view model =
     div [] [
-        h1 [] [ text "Score Keeper" ],
+        h1 [] [ text "Score Keeper!" ],
+        loadingMsg model,
         playerSection model,
         playerForm model,
         playsSection model
+    ]
+
+loadingMsg: Model -> Html Msg
+loadingMsg {persisting} =
+    div [] [
+        if persisting > 0 then
+            text "saving..."
+        else
+            text "saved."
     ]
 
 playsSection: Model -> Html Msg
@@ -221,10 +253,22 @@ playerForm model =
         button [ type_ "button", onClick Cancel ] [ text "←" ]
     ]
 
+port persistData: Data -> Cmd msg
+port donePersisting: (Bool -> msg) -> Sub msg
+port receiveData: (Data -> msg) -> Sub msg
+
+subscriptions: Model -> Sub Msg
+subscriptions model =
+    Sub.batch [
+        receiveData (\data -> ReceiveData {model | players = data.players, plays = data.plays}),
+        donePersisting DonePersisting
+    ]
+
 main: Program Never Model Msg
 main = 
-    Html.beginnerProgram {
-        model = initModel,
+    Html.program {
+        init = initModel,
         view = view,
-        update = update
+        update = update,
+        subscriptions = subscriptions
     }

@@ -8365,6 +8365,17 @@ var _user$project$Main$playListHeader = A2(
 			_1: {ctor: '[]'}
 		}
 	});
+var _user$project$Main$loadingMsg = function (_p0) {
+	var _p1 = _p0;
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: (_elm_lang$core$Native_Utils.cmp(_p1.persisting, 0) > 0) ? _elm_lang$html$Html$text('saving...') : _elm_lang$html$Html$text('saved.'),
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Main$modifyPlayer = F2(
 	function (model, id) {
 		var newPlayers = A2(
@@ -8380,15 +8391,80 @@ var _user$project$Main$modifyPlayer = F2(
 			{players: newPlayers, name: '', playerId: _elm_lang$core$Maybe$Nothing});
 	});
 var _user$project$Main$initModel = {
-	players: {ctor: '[]'},
-	name: '',
-	playerId: _elm_lang$core$Maybe$Nothing,
-	plays: {ctor: '[]'}
+	ctor: '_Tuple2',
+	_0: {
+		players: {ctor: '[]'},
+		name: '',
+		playerId: _elm_lang$core$Maybe$Nothing,
+		plays: {ctor: '[]'},
+		persisting: 0
+	},
+	_1: _elm_lang$core$Platform_Cmd$none
 };
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {players: a, name: b, playerId: c, plays: d};
+var _user$project$Main$persistData = _elm_lang$core$Native_Platform.outgoingPort(
+	'persistData',
+	function (v) {
+		return {
+			players: _elm_lang$core$Native_List.toArray(v.players).map(
+				function (v) {
+					return {id: v.id, name: v.name};
+				}),
+			plays: _elm_lang$core$Native_List.toArray(v.plays).map(
+				function (v) {
+					return {id: v.id, playerId: v.playerId, points: v.points};
+				})
+		};
 	});
+var _user$project$Main$donePersisting = _elm_lang$core$Native_Platform.incomingPort('donePersisting', _elm_lang$core$Json_Decode$bool);
+var _user$project$Main$receiveData = _elm_lang$core$Native_Platform.incomingPort(
+	'receiveData',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (players) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (plays) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{players: players, plays: plays});
+				},
+				A2(
+					_elm_lang$core$Json_Decode$field,
+					'plays',
+					_elm_lang$core$Json_Decode$list(
+						A2(
+							_elm_lang$core$Json_Decode$andThen,
+							function (id) {
+								return A2(
+									_elm_lang$core$Json_Decode$andThen,
+									function (playerId) {
+										return A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (points) {
+												return _elm_lang$core$Json_Decode$succeed(
+													{id: id, playerId: playerId, points: points});
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'points', _elm_lang$core$Json_Decode$int));
+									},
+									A2(_elm_lang$core$Json_Decode$field, 'playerId', _elm_lang$core$Json_Decode$int));
+							},
+							A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$int)))));
+		},
+		A2(
+			_elm_lang$core$Json_Decode$field,
+			'players',
+			_elm_lang$core$Json_Decode$list(
+				A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (id) {
+						return A2(
+							_elm_lang$core$Json_Decode$andThen,
+							function (name) {
+								return _elm_lang$core$Json_Decode$succeed(
+									{id: id, name: name});
+							},
+							A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+					},
+					A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$int))))));
 var _user$project$Main$Player = F2(
 	function (a, b) {
 		return {id: a, name: b};
@@ -8404,9 +8480,9 @@ var _user$project$Main$add = function (model) {
 		{players: newPlayers, name: ''});
 };
 var _user$project$Main$save = function (model) {
-	var _p0 = model.playerId;
-	if (_p0.ctor === 'Just') {
-		return A2(_user$project$Main$modifyPlayer, model, _p0._0);
+	var _p2 = model.playerId;
+	if (_p2.ctor === 'Just') {
+		return A2(_user$project$Main$modifyPlayer, model, _p2._0);
 	} else {
 		return _user$project$Main$add(model);
 	}
@@ -8447,43 +8523,106 @@ var _user$project$Main$score = F3(
 				plays: {ctor: '::', _0: play, _1: model.plays}
 			});
 	});
+var _user$project$Main$Data = F2(
+	function (a, b) {
+		return {players: a, plays: b};
+	});
+var _user$project$Main$persist = function (model) {
+	return {
+		ctor: '_Tuple2',
+		_0: _elm_lang$core$Native_Utils.update(
+			model,
+			{persisting: model.persisting + 1}),
+		_1: _user$project$Main$persistData(
+			A2(_user$project$Main$Data, model.players, model.plays))
+	};
+};
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p1 = msg;
-		switch (_p1.ctor) {
+		var _p3 = msg;
+		switch (_p3.ctor) {
+			case 'ReceiveData':
+				return {ctor: '_Tuple2', _0: _p3._0, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'Input':
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{name: _p1._0});
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{name: _p3._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'Cancel':
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{name: '', playerId: _elm_lang$core$Maybe$Nothing});
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{name: '', playerId: _elm_lang$core$Maybe$Nothing}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'Save':
-				return _elm_lang$core$Native_Utils.eq(model.name, '') ? model : _user$project$Main$save(model);
+				return _user$project$Main$persist(
+					_elm_lang$core$Native_Utils.eq(model.name, '') ? model : _user$project$Main$save(model));
 			case 'Edit':
-				var _p2 = _p1._0;
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						name: _p2.name,
-						playerId: _elm_lang$core$Maybe$Just(_p2.id)
-					});
+				var _p4 = _p3._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							name: _p4.name,
+							playerId: _elm_lang$core$Maybe$Just(_p4.id)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'Score':
-				return A3(_user$project$Main$score, model, _p1._0, _p1._1);
+				return _user$project$Main$persist(
+					A3(_user$project$Main$score, model, _p3._0, _p3._1));
+			case 'DeletePlay':
+				return _user$project$Main$persist(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							plays: A2(
+								_elm_lang$core$List$filter,
+								function (p) {
+									return !_elm_lang$core$Native_Utils.eq(p, _p3._0);
+								},
+								model.plays)
+						}));
 			default:
-				return _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						plays: A2(
-							_elm_lang$core$List$filter,
-							function (p) {
-								return !_elm_lang$core$Native_Utils.eq(p, _p1._0);
-							},
-							model.plays)
-					});
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{persisting: model.persisting - 1}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
+var _user$project$Main$DonePersisting = function (a) {
+	return {ctor: 'DonePersisting', _0: a};
+};
+var _user$project$Main$ReceiveData = function (a) {
+	return {ctor: 'ReceiveData', _0: a};
+};
+var _user$project$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$batch(
+		{
+			ctor: '::',
+			_0: _user$project$Main$receiveData(
+				function (data) {
+					return _user$project$Main$ReceiveData(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{players: data.players, plays: data.plays}));
+				}),
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$donePersisting(_user$project$Main$DonePersisting),
+				_1: {ctor: '[]'}
+			}
+		});
+};
 var _user$project$Main$DeletePlay = function (a) {
 	return {ctor: 'DeletePlay', _0: a};
 };
@@ -8774,26 +8913,30 @@ var _user$project$Main$view = function (model) {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Score Keeper'),
+					_0: _elm_lang$html$Html$text('Score Keeper!'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$playerSection(model),
+				_0: _user$project$Main$loadingMsg(model),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Main$playerForm(model),
+					_0: _user$project$Main$playerSection(model),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Main$playsSection(model),
-						_1: {ctor: '[]'}
+						_0: _user$project$Main$playerForm(model),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Main$playsSection(model),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			}
 		});
 };
-var _user$project$Main$main = _elm_lang$html$Html$beginnerProgram(
-	{model: _user$project$Main$initModel, view: _user$project$Main$view, update: _user$project$Main$update})();
+var _user$project$Main$main = _elm_lang$html$Html$program(
+	{init: _user$project$Main$initModel, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
